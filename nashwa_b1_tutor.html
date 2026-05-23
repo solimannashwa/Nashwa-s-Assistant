@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Nashwa's English Assistant</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;min-height:100vh;background:#f0f0eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;}
+.shell{width:100%;max-width:600px;margin:0 auto;background:#fff;min-height:100vh;display:flex;flex-direction:column;}
+.hdr{background:#0F6E56;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.logo{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0;}
+.hdr-title{color:#fff;font-size:16px;font-weight:600;}
+.hdr-sub{color:rgba(255,255,255,0.75);font-size:11px;}
+.nav{display:flex;background:#fff;border-bottom:1px solid #e8e8e8;overflow-x:auto;position:sticky;top:66px;z-index:99;}
+.nav::-webkit-scrollbar{display:none;}
+.nt{padding:11px 13px;font-size:12px;color:#666;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit;}
+.nt.on{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:600;}
+.panel{display:none;padding:14px;flex-direction:column;gap:10px;}
+.panel.on{display:flex;}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:14px;}
+.lbl{font-size:10px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+select,textarea,input[type=text],input[type=password]{width:100%;font-family:inherit;font-size:14px;color:#1a1a1a;padding:10px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;outline:none;}
+select:focus,textarea:focus,input:focus{border-color:#1D9E75;}
+textarea{min-height:80px;line-height:1.6;resize:vertical;}
+.btn{background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-weight:500;}
+.btn:hover{background:#0F6E56;}
+.btn:disabled{background:#9FE1CB;cursor:not-allowed;}
+.btn2{background:none;border:1px solid #ddd;border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;color:#666;font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
+.btn2:hover{background:#f5f5f5;}
+.btn-rec{background:#E24B4A;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-weight:500;}
+.btn-rec:hover{background:#A32D2D;}
+.btn-rec.recording{background:#A32D2D;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+.dots{display:none;align-items:center;gap:7px;font-size:12px;color:#888;padding:4px 0;}
+.dots.on{display:flex;}
+.dot{width:5px;height:5px;border-radius:50%;background:#1D9E75;animation:b 1.2s infinite;}
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+@keyframes b{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+.chip{padding:6px 12px;font-size:12px;border-radius:20px;border:1px solid #ddd;background:#fff;cursor:pointer;color:#666;font-family:inherit;margin-bottom:2px;}
+.chip.on{background:#E1F5EE;border-color:#1D9E75;color:#085041;font-weight:600;}
+.v-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:4px;}
+.v-card{background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;}
+.v-img{width:100%;height:70px;display:flex;align-items:center;justify-content:center;font-size:28px;}
+.v-body{padding:9px 10px;}
+.v-word{font-size:13px;font-weight:600;color:#1D9E75;margin-bottom:2px;}
+.v-def{font-size:11px;color:#888;margin-bottom:3px;line-height:1.4;}
+.v-ex{font-size:11px;color:#333;font-style:italic;line-height:1.4;}
+.mcq-card{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:13px;margin-bottom:9px;}
+.mcq-q{font-size:14px;font-weight:500;color:#1a1a1a;margin-bottom:11px;line-height:1.5;}
+.mcq-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.mcq-tile{border-radius:8px;padding:9px 10px;font-size:13px;cursor:pointer;text-align:left;font-family:inherit;border:1.5px solid #ddd;background:#f8f8f8;color:#333;display:flex;align-items:flex-start;gap:7px;line-height:1.4;}
+.mcq-tile:hover:not(:disabled){border-color:#1D9E75;background:#E1F5EE;}
+.tl{width:20px;height:20px;border-radius:50%;background:#1D9E75;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.mcq-tile.ok{background:#E1F5EE;border-color:#1D9E75;color:#085041;}
+.mcq-tile.ok .tl{background:#085041;}
+.mcq-tile.no{background:#FCEBEB;border-color:#A32D2D;color:#501313;}
+.mcq-tile.no .tl{background:#A32D2D;}
+.mcq-fb{margin-top:9px;padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.5;display:none;}
+.mcq-fb.on{display:block;}
+.mcq-fb.ok{background:#E1F5EE;color:#085041;}
+.mcq-fb.no{background:#FCEBEB;color:#501313;}
+.sym-key{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.sym{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+.s-sp{background:#FCEBEB;color:#A32D2D;}.s-gr{background:#FAEEDA;color:#854F0B;}.s-ww{background:#E6F1FB;color:#185FA5;}.s-p{background:#EEEDFE;color:#534AB7;}.s-cap{background:#EAF3DE;color:#3B6D11;}.s-miss{background:#E1F5EE;color:#0F6E56;}.s-wf{background:#FBEAF0;color:#993556;}
+.corr-box{font-size:14px;line-height:2.2;padding:13px;background:#f8f8f8;border-radius:8px;color:#1a1a1a;}
+.e-sp{background:#FCEBEB;color:#A32D2D;border-radius:3px;padding:0 3px;text-decoration:line-through;font-size:13px;}
+.e-fix{background:#E1F5EE;color:#085041;border-radius:3px;padding:0 3px;font-weight:600;font-size:13px;}
+.e-gr{background:#FAEEDA;color:#854F0B;border-radius:3px;padding:0 3px;font-size:13px;}
+.e-ww{background:#E6F1FB;color:#185FA5;border-radius:3px;padding:0 3px;font-size:13px;}
+.e-p{background:#EEEDFE;color:#534AB7;border-radius:3px;padding:0 3px;font-size:13px;}
+.e-cap{background:#EAF3DE;color:#3B6D11;border-radius:3px;padding:0 3px;font-weight:600;font-size:13px;}
+.e-wf{background:#FBEAF0;color:#993556;border-radius:3px;padding:0 3px;font-size:13px;}
+.sup{font-size:9px;padding:0 2px;border-radius:2px;margin-left:1px;vertical-align:super;}
+.fb-good{background:#E1F5EE;border:1px solid #5DCAA5;border-radius:8px;padding:11px 13px;font-size:13px;color:#085041;line-height:1.6;margin-top:9px;}
+.fb-enc{background:#E1F5EE;border:1px solid #1D9E75;border-radius:8px;padding:10px 13px;font-size:14px;color:#085041;font-weight:600;margin-top:7px;}
+.gram-rule{background:#f8f8f8;border-left:3px solid #1D9E75;padding:11px 13px;border-radius:0 8px 8px 0;margin-bottom:11px;font-size:13px;line-height:1.7;}
+.read-pass{background:#f8f8f8;border-radius:8px;padding:13px;font-size:14px;line-height:1.75;color:#1a1a1a;margin-bottom:11px;}
+.expo-tool{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f8f8f8;border-radius:8px;font-size:13px;color:#333;margin-bottom:5px;}
+.expo-tip{display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#333;line-height:1.5;}
+.wc{font-size:11px;color:#aaa;text-align:right;margin-top:3px;}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="hdr">
+  <div class="logo">N</div>
+  <div>
+    <div class="hdr-title">Nashwa's English Assistant</div>
+    <div class="hdr-sub">Your B1 AI Tutor</div>
+  </div>
+</div>
+<div class="nav">
+  <button class="nt on" onclick="sw('vocab',this)">📚 Vocab</button>
+  <button class="nt" onclick="sw('grammar',this)">📝 Grammar</button>
+  <button class="nt" onclick="sw('writing',this)">✍️ Writing</button>
+  <button class="nt" onclick="sw('speaking',this)">🎙️ Speaking</button>
+  <button class="nt" onclick="sw('reading',this)">📖 Reading</button>
+  <button class="nt" onclick="sw('expo',this)">🤖 AI Expo</button>
+</div>
+
+<!-- VOCAB -->
+<div id="p-vocab" class="panel on">
+  <div class="card">
+    <div class="lbl">Choose a topic</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;" id="vocab-chips"></div>
+  </div>
+  <div id="vocab-main" style="display:none;">
+    <div class="card">
+      <div id="unit-banner" style="border-radius:8px;padding:10px 13px;margin-bottom:11px;display:flex;align-items:center;gap:11px;"></div>
+      <div style="display:flex;gap:7px;margin-bottom:11px;flex-wrap:wrap;">
+        <button class="btn" onclick="showVW()">📇 Cards</button>
+        <button class="btn2" onclick="showVF()">✏️ Fill in</button>
+        <button class="btn2" onclick="showVM()">🎯 MCQ</button>
+      </div>
+      <div id="v-display"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GRAMMAR -->
+<div id="p-grammar" class="panel">
+  <div class="card">
+    <div class="lbl">Choose a grammar rule</div>
+    <select id="gram-sel" onchange="loadGram()">
+      <option value="">-- Select --</option>
+      <option value="ps">Present simple + adverbs of frequency</option>
+      <option value="pc">Present simple vs present continuous</option>
+      <option value="comp">Comparative and superlative adjectives</option>
+      <option value="pst">Past simple (regular + irregular)</option>
+      <option value="pco">Past continuous + when/while</option>
+      <option value="quant">Quantifiers</option>
+      <option value="art">Articles (a, an, the, zero)</option>
+      <option value="inf">Infinitives (want to, hope to, plan to)</option>
+      <option value="fut">Future forms (will, going to, present continuous)</option>
+      <option value="pp">Present perfect vs past simple</option>
+      <option value="ppfs">Present perfect with for and since</option>
+      <option value="zf">Zero and first conditional</option>
+      <option value="rel">Defining relative clauses</option>
+      <option value="pass">Passive voice (present + past)</option>
+      <option value="ut">Used to (past habits)</option>
+      <option value="rep">Reported speech</option>
+      <option value="sc">Second conditional</option>
+      <option value="cpd">Compound pronouns</option>
+    </select>
+  </div>
+  <div class="card" id="gram-content" style="display:none;">
+    <div id="gram-rule-box"></div>
+    <div id="gram-qs"></div>
+  </div>
+</div>
+
+<!-- WRITING -->
+<div id="p-writing" class="panel">
+  <div class="card">
+    <div class="lbl">Choose a writing type</div>
+    <select id="write-sel" onchange="loadWrite()">
+      <option value="">-- Select --</option>
+      <option value="daily">Daily routine description</option>
+      <option value="comp">Comparative paragraph</option>
+      <option value="narr">Narrative paragraph (survival story)</option>
+      <option value="opin">Opinion paragraph</option>
+      <option value="fut">Future plans paragraph</option>
+      <option value="rev">Write a review</option>
+      <option value="bio">Biography paragraph</option>
+    </select>
+  </div>
+  <div id="write-guide" style="display:none;" class="card"></div>
+  <div id="write-sym" style="display:none;" class="card">
+    <div class="lbl">Correction symbols</div>
+    <div class="sym-key">
+      <span class="sym s-sp">SP spelling</span><span class="sym s-gr">GR grammar</span><span class="sym s-ww">WW wrong word</span><span class="sym s-p">P punctuation</span><span class="sym s-wf">WF word form</span><span class="sym s-cap">CAP capital letter</span><span class="sym s-miss">^ missing word</span>
+    </div>
+  </div>
+  <div id="write-form" style="display:none;" class="card">
+    <div class="lbl" id="write-title">Write here</div>
+    <div id="write-fields"></div>
+    <div style="margin-top:11px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" id="w-btn" onclick="getWriteCorrection()">✨ Get correction</button>
+      <button class="btn2" onclick="clearWriteForm()">↺ Clear</button>
+    </div>
+    <div class="dots" id="w-load" style="margin-top:9px;"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:13px;">Checking your writing...</span></div>
+  </div>
+  <div id="w-result" style="display:none;" class="card">
+    <div class="lbl">Your corrected text</div>
+    <div class="corr-box" id="corr-box"></div>
+    <div id="w-good"></div>
+    <div id="w-enc"></div>
+    <div style="margin-top:11px;"><button class="btn2" onclick="document.getElementById('w-result').style.display='none';">↺ Try again</button></div>
+  </div>
+</div>
+
+<!-- SPEAKING -->
+<div id="p-speaking" class="panel">
+  <div class="card">
+    <div class="lbl">Choose a topic</div>
+    <select id="speak-sel" onchange="loadSpeak()">
+      <option value="">-- Select --</option>
+      <option value="u1">Lifestyle and habits</option>
+      <option value="u3">Transportation</option>
+      <option value="u4">Challenges</option>
+      <option value="u5">The environment</option>
+      <option value="u6">Stages of life</option>
+      <option value="u7">Work and jobs</option>
+      <option value="u8">Technology</option>
+      <option value="u9">Products and shopping</option>
+      <option value="u11">History</option>
+      <option value="u12">Nature and weather</option>
+    </select>
+  </div>
+  <div id="speak-qs-wrap"></div>
+</div>
+
+<!-- READING -->
+<div id="p-reading" class="panel">
+  <div class="card">
+    <div class="lbl">Choose a theme</div>
+    <select id="read-sel" onchange="loadRead()">
+      <option value="">-- Select --</option>
+      <option value="u1">Lifestyle and health</option>
+      <option value="u3">Transportation</option>
+      <option value="u4">Challenges and survival</option>
+      <option value="u5">The environment</option>
+      <option value="u6">Stages of life</option>
+      <option value="u7">Work and careers</option>
+      <option value="u8">Technology</option>
+      <option value="u9">Products and marketing</option>
+      <option value="u11">History</option>
+      <option value="u12">Nature and weather</option>
+    </select>
+    <div class="dots" id="read-load" style="margin-top:9px;"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:13px;">Generating passage...</span></div>
+  </div>
+  <div id="read-out" style="display:none;" class="card">
+    <div class="lbl" id="read-theme">Reading</div>
+    <div class="read-pass" id="read-pass"></div>
+    <div class="lbl">Answer the questions</div>
+    <div id="read-qs"></div>
+    <div style="margin-top:11px;"><button class="btn2" onclick="loadRead()">↺ New passage</button></div>
+  </div>
+</div>
+
+<!-- EXPO -->
+<div id="p-expo" class="panel">
+  <div class="card">
+    <div class="lbl">Your station</div>
+    <select id="expo-sel" onchange="loadExpo()">
+      <option value="">-- Select --</option>
+      <option value="s1">Station 1 — AI Audio Studio</option>
+      <option value="s2">Station 2 — AI Research & Source-Checker</option>
+      <option value="s3">Station 3 — AI Visual Study Studio</option>
+      <option value="s4">Station 4 — AI Speaking & Self-Quiz Studio</option>
+      <option value="s5">Station 5 — AI Video Studio</option>
+    </select>
+  </div>
+  <div id="expo-out"></div>
+  <div class="card">
+    <div class="lbl">Practice — ask anything</div>
+    <textarea id="expo-inp" placeholder="Example: Help me explain NotebookLM in simple English." style="min-height:70px;"></textarea>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+      <button class="btn" onclick="sendExpoAI()">Send ✦</button>
+      <div class="dots" id="expo-load"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+    <div id="expo-reply" style="display:none;margin-top:9px;" class="fb-good"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const GEMINI_KEY='AIzaSyDcffrKLYblyn9by6vMH55QHTr3SRBkrqM';
+const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY;
+
+async function callAI(prompt){
+  const res=await fetch(GEMINI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:1000,temperature:0.7}})});
+  const data=await res.json();
+  if(data.error)throw new Error(data.error.message);
+  return data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+
+async function callAIWithAudio(prompt,base64audio,mimeType){
+  const res=await fetch(GEMINI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:mimeType,data:base64audio}}]}],generationConfig:{maxOutputTokens:400,temperature:0.7}})});
+  const data=await res.json();
+  if(data.error)throw new Error(data.error.message);
+  return data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+
+function sw(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+const UNITS={
+  1:{name:'Lifestyle',color:'#1D9E75',bg:'#E1F5EE',emoji:'🏃',vocab:[
+    {w:'get up',def:'to wake up and leave your bed',ex:'I get up at six every morning.',e:'⏰'},
+    {w:'take a break',def:'to stop working for a short time',ex:"Let's take a break after this.",e:'☕'},
+    {w:'fall asleep',def:'to start sleeping',ex:'I fall asleep quickly at night.',e:'😴'},
+    {w:'stay up',def:'to go to bed very late',ex:'I stay up until midnight on weekends.',e:'🌙'},
+    {w:'feel tired',def:'to have no energy',ex:'I feel tired after a long day.',e:'😓'},
+    {w:'work long hours',def:'to work for a long time each day',ex:'My father works long hours every week.',e:'🕐'},
+    {w:'do exercise',def:'to do physical activity',ex:'She does exercise three times a week.',e:'🏋️'},
+    {w:'wake up early',def:'to stop sleeping early in the morning',ex:'I wake up early to study.',e:'🌅'},
+  ],fill:[
+    {sent:'I always _____ up at seven.',ans:1,opts:['make','wake','take','fall']},
+    {sent:'She _____ asleep quickly every night.',ans:0,opts:['falls','takes','gets','stays']},
+    {sent:'He needs to _____ a break.',ans:2,opts:['make','do','take','get']},
+    {sent:'They _____ up very late on weekends.',ans:3,opts:['fall','take','wake','stay']},
+    {sent:'My brother _____ long hours at his job.',ans:1,opts:['does','works','makes','goes']},
+  ]},
+  3:{name:'Transportation',color:'#185FA5',bg:'#E6F1FB',emoji:'🚌',vocab:[
+    {w:'traffic jam',def:'when many cars stop and cannot move',ex:'There was a big traffic jam this morning.',e:'🚗'},
+    {w:'rush hour',def:'busy time when people travel to or from work',ex:'The bus is always full during rush hour.',e:'⏱️'},
+    {w:'public transportation',def:'buses and trains that everyone can use',ex:'Public transportation is improving.',e:'🚍'},
+    {w:'fare',def:'money you pay to travel on a bus or train',ex:'The bus fare is two riyals.',e:'💰'},
+    {w:'commute',def:'to travel regularly between home and work',ex:'She commutes to college by car.',e:'🛣️'},
+    {w:'electric car',def:'a car that uses electricity, not gasoline',ex:'Electric cars are better for the environment.',e:'⚡'},
+    {w:'carbon emissions',def:'harmful gases that vehicles produce',ex:'Airplanes produce many carbon emissions.',e:'💨'},
+    {w:'hybrid',def:'using two types of energy: electricity and fuel',ex:'A hybrid car uses less fuel.',e:'🔋'},
+  ],fill:[
+    {sent:'The bus _____ is two riyals.',ans:2,opts:['ticket','cost','fare','price']},
+    {sent:'There is always a traffic _____ near school.',ans:0,opts:['jam','stop','rush','block']},
+    {sent:'She _____ to work by train every day.',ans:1,opts:['travels','commutes','drives','rushes']},
+    {sent:'An electric car uses _____, not gasoline.',ans:3,opts:['gas','fuel','oil','electricity']},
+    {sent:'_____ hour is the busiest time on the roads.',ans:2,opts:['Traffic','Peak','Rush','Busy']},
+  ]},
+  4:{name:'Challenges',color:'#993C1D',bg:'#FAECE7',emoji:'🧗',vocab:[
+    {w:'achievement',def:'something difficult you successfully completed',ex:'Finishing the marathon was a great achievement.',e:'🏆'},
+    {w:'challenge',def:'something new and difficult needing effort',ex:'Learning English is a challenge.',e:'💪'},
+    {w:'survivor',def:'a person who continues to live after danger',ex:'The survivors were taken to hospital.',e:'🦺'},
+    {w:'crawl',def:'to move on your hands and knees',ex:'The baby crawled across the floor.',e:'🐢'},
+    {w:'determination',def:'deciding to keep trying even when it is hard',ex:'She showed great determination.',e:'🎯'},
+    {w:'risk',def:'the possibility that something bad will happen',ex:'There is always a risk.',e:'⚠️'},
+    {w:'barely',def:'almost not; only just',ex:'He barely survived the desert storm.',e:'😰'},
+    {w:'rescue',def:'to save someone from a dangerous situation',ex:'The team rescued the lost hikers.',e:'🚁'},
+  ],fill:[
+    {sent:'Climbing the mountain was a great _____.',ans:0,opts:['achievement','challenge','rescue','risk']},
+    {sent:'The _____ of the accident were in good health.',ans:2,opts:['rescuers','climbers','survivors','hikers']},
+    {sent:'She showed great _____ and never stopped trying.',ans:1,opts:['risk','determination','challenge','crawl']},
+    {sent:'The children had to _____ through the small tunnel.',ans:3,opts:['climb','rescue','survive','crawl']},
+    {sent:'There is always a _____ when you try something new.',ans:0,opts:['risk','rescue','crawl','determination']},
+  ]},
+  5:{name:'Environment',color:'#3B6D11',bg:'#EAF3DE',emoji:'🌿',vocab:[
+    {w:'recycle',def:'to use materials again instead of throwing away',ex:'We recycle paper, glass, and plastic.',e:'♻️'},
+    {w:'pollution',def:'harmful chemicals or waste in the environment',ex:'Air pollution is a big problem.',e:'🏭'},
+    {w:'deforestation',def:'cutting down trees in a forest',ex:'Deforestation destroys animal homes.',e:'🌲'},
+    {w:'sustainable',def:'using resources without damaging the environment',ex:'We need sustainable energy.',e:'🌱'},
+    {w:'carbon footprint',def:'total carbon emissions a person produces',ex:'Flying creates a large carbon footprint.',e:'👣'},
+    {w:'renewable energy',def:'energy from sources that never run out',ex:'Saudi Arabia invests in renewable energy.',e:'☀️'},
+    {w:'waste',def:'things you throw away because you do not need them',ex:'There is a lot of waste on the beach.',e:'🗑️'},
+    {w:'endangered',def:'at risk of completely disappearing',ex:'Some animals are endangered.',e:'🐆'},
+  ],fill:[
+    {sent:'We should _____ glass and plastic bottles.',ans:0,opts:['recycle','pollute','destroy','produce']},
+    {sent:'Solar energy is a _____ source of energy.',ans:2,opts:['dangerous','polluted','renewable','carbon']},
+    {sent:'_____ is destroying rainforests around the world.',ans:1,opts:['Pollution','Deforestation','Recycling','Energy']},
+    {sent:'Air _____ is a serious problem in many cities.',ans:3,opts:['energy','footprint','waste','pollution']},
+    {sent:'We must find _____ ways to use energy.',ans:0,opts:['sustainable','dangerous','expensive','polluted']},
+  ]},
+  6:{name:'Stages of Life',color:'#534AB7',bg:'#EEEDFE',emoji:'🎓',vocab:[
+    {w:'retire',def:'to stop working permanently, usually when old',ex:'My grandfather retired at sixty.',e:'🧓'},
+    {w:'graduate',def:'to finish a university or college course',ex:'She will graduate next year.',e:'🎓'},
+    {w:'enrol',def:'to officially join a school or course',ex:'I enrolled in the English program.',e:'📝'},
+    {w:'milestone',def:'an important event in someone\'s life',ex:'Graduating is a big milestone.',e:'🏁'},
+    {w:'generation',def:'all people born at about the same time',ex:"My parents' generation is different.",e:'👨‍👩‍👧'},
+    {w:'ambition',def:'a strong desire to achieve something',ex:'Her ambition is to become a doctor.',e:'🚀'},
+    {w:'volunteer',def:'to offer to do something without being paid',ex:'She volunteers at a hospital.',e:'🤝'},
+    {w:'coming-of-age',def:'when a young person becomes an adult',ex:'Many cultures have coming-of-age ceremonies.',e:'🌟'},
+  ],fill:[
+    {sent:'My uncle _____ from his job at the age of 65.',ans:1,opts:['graduated','retired','enrolled','volunteered']},
+    {sent:'She plans to _____ in a business course.',ans:0,opts:['enrol','retire','graduate','volunteer']},
+    {sent:'Getting married is an important _____ in life.',ans:3,opts:['ambition','generation','ceremony','milestone']},
+    {sent:'Her _____ is to become an engineer.',ans:2,opts:['generation','milestone','ambition','volunteer']},
+    {sent:'He wants to _____ at a charity during the holidays.',ans:0,opts:['volunteer','retire','enrol','graduate']},
+  ]},
+  7:{name:'Work',color:'#854F0B',bg:'#FAEEDA',emoji:'💼',vocab:[
+    {w:'salary',def:'money you receive for doing a job each month',ex:'He earns a good salary.',e:'💵'},
+    {w:'colleague',def:'a person you work with',ex:'My colleagues are very helpful.',e:'🤝'},
+    {w:'promotion',def:'getting a better job in the same company',ex:'She got a promotion last year.',e:'📈'},
+    {w:'application',def:'a formal request for a job',ex:'I sent my job application yesterday.',e:'📄'},
+    {w:'qualification',def:'an official certificate showing you completed a course',ex:'A degree is an important qualification.',e:'🏅'},
+    {w:'entrepreneur',def:'a person who starts their own business',ex:'Young entrepreneurs are changing business.',e:'💡'},
+    {w:'influencer',def:'a person with many followers who promotes products',ex:'She is a social media influencer.',e:'📱'},
+    {w:'résumé / CV',def:'document listing your education and work experience',ex:'She updated her résumé.',e:'📋'},
+  ],fill:[
+    {sent:'She received a _____ after three years of hard work.',ans:2,opts:['salary','application','promotion','qualification']},
+    {sent:'A doctor needs many years of education and _____.',ans:0,opts:['qualification','salary','résumé','colleague']},
+    {sent:'My _____ helped me when I had a problem at work.',ans:3,opts:['influencer','entrepreneur','salary','colleague']},
+    {sent:'He sent his _____ to ten companies this week.',ans:1,opts:['résumé','application','promotion','salary']},
+    {sent:'The _____ started her own company at age 22.',ans:0,opts:['entrepreneur','influencer','colleague','applicant']},
+  ]},
+  8:{name:'Technology',color:'#0F6E56',bg:'#E1F5EE',emoji:'💻',vocab:[
+    {w:'software',def:'programs and applications that run on a computer',ex:'You need to install the software first.',e:'💾'},
+    {w:'download',def:'to copy files from the internet to your device',ex:'Download the app from the App Store.',e:'⬇️'},
+    {w:'update',def:'to get the newest version of a program',ex:'Please update your software now.',e:'🔄'},
+    {w:'invention',def:'a new thing someone creates for the first time',ex:'The smartphone is a great invention.',e:'💡'},
+    {w:'biomimetics',def:'designing things by copying ideas from nature',ex:'Biomimetics is used to design better robots.',e:'🦋'},
+    {w:'artificial intelligence',def:'computers doing tasks that need human thinking',ex:'AI is changing every industry.',e:'🤖'},
+    {w:'password',def:'a secret word or code you use to enter a device',ex:'Use a strong password.',e:'🔐'},
+    {w:'store data',def:'to save information on a computer or phone',ex:'The app stores data about your habits.',e:'🗄️'},
+  ],fill:[
+    {sent:'You need to _____ the app before you can use it.',ans:2,opts:['store','update','download','design']},
+    {sent:'The new _____ allows computers to write their own code.',ans:0,opts:['software','data','password','invention']},
+    {sent:'Scientists use _____ to copy ideas from nature.',ans:1,opts:['software','biomimetics','data','invention']},
+    {sent:'Please _____ your phone to the latest version.',ans:3,opts:['download','store','delete','update']},
+    {sent:'The wheel is one of the oldest human _____.',ans:0,opts:['inventions','passwords','downloads','updates']},
+  ]},
+  9:{name:'Products',color:'#D4537E',bg:'#FBEAF0',emoji:'🛍️',vocab:[
+    {w:'logo',def:'a symbol or design that represents a company',ex:'The Apple logo is very famous.',e:'🎨'},
+    {w:'brand',def:'a name a company uses for its products',ex:'Nike is a famous sports brand.',e:'👟'},
+    {w:'advertise',def:'to tell people about a product to make them buy it',ex:'Companies advertise on social media.',e:'📣'},
+    {w:'consumer',def:'a person who buys and uses products',ex:'Young consumers prefer to shop online.',e:'🛒'},
+    {w:'manufacture',def:'to make products in large numbers in a factory',ex:'This company manufactures cars.',e:'🏭'},
+    {w:'launch',def:'to introduce a new product to the public',ex:'The company will launch its new phone next month.',e:'🚀'},
+    {w:'distribute',def:'to send products to different places to be sold',ex:'They distribute products to 50 countries.',e:'🌍'},
+    {w:'target audience',def:'the group of people a product is made for',ex:'The target audience is teenagers.',e:'🎯'},
+  ],fill:[
+    {sent:'The company will _____ its new product next week.',ans:3,opts:['manufacture','advertise','distribute','launch']},
+    {sent:'A _____ is a symbol that represents a company.',ans:0,opts:['logo','brand','product','consumer']},
+    {sent:'They _____ their phones in a large factory.',ans:2,opts:['advertise','distribute','manufacture','launch']},
+    {sent:'Young people are the _____ audience for this app.',ans:1,opts:['brand','target','consumer','logo']},
+    {sent:'She is a smart _____ who always reads reviews.',ans:3,opts:['brand','manufacturer','distributor','consumer']},
+  ]},
+  11:{name:'History',color:'#5F5E5A',bg:'#F1EFE8',emoji:'🏛️',vocab:[
+    {w:'archaeologist',def:'a scientist who studies old objects from the past',ex:'Archaeologists discovered ancient coins.',e:'⛏️'},
+    {w:'civilization',def:'a society with high culture and organization',ex:'Ancient Egypt was a great civilization.',e:'🏺'},
+    {w:'artifact',def:'an object made by people in the past',ex:'The museum has thousands of artifacts.',e:'🏺'},
+    {w:'ancient',def:'from a very long time ago',ex:'Saudi Arabia has many ancient sites.',e:'🕌'},
+    {w:'decade',def:'a period of ten years',ex:'The smartphone changed our lives in one decade.',e:'📆'},
+    {w:'tomb',def:'a place where a dead person is buried',ex:'Archaeologists found gold inside the ancient tomb.',e:'⚰️'},
+    {w:'timeline',def:'a chart showing events in order',ex:'We made a timeline of history events.',e:'📅'},
+    {w:'document',def:'an official paper with important information',ex:"This old document shows the building's history.",e:'📜'},
+  ],fill:[
+    {sent:'She is an _____ who studies objects from the past.',ans:0,opts:['archaeologist','historian','artifact','soldier']},
+    {sent:'The museum has many _____ from ancient Saudi Arabia.',ans:2,opts:['timelines','documents','artifacts','decades']},
+    {sent:'A _____ is a period of ten years.',ans:1,opts:['century','decade','civilization','timeline']},
+    {sent:'Ancient Egyptian _____ is one of the most studied.',ans:3,opts:['timeline','artifact','document','civilization']},
+    {sent:'Archaeologists found gold inside the old _____.',ans:0,opts:['tomb','artifact','document','timeline']},
+  ]},
+  12:{name:'Nature',color:'#378ADD',bg:'#E6F1FB',emoji:'🌪️',vocab:[
+    {w:'drought',def:'a long period with no rain',ex:'The drought destroyed the crops.',e:'☀️'},
+    {w:'flooding',def:'when too much water covers a usually dry area',ex:'Heavy rain caused flooding.',e:'🌊'},
+    {w:'wildfire',def:'a fire that burns quickly across a large area',ex:'Wildfires destroyed thousands of trees.',e:'🔥'},
+    {w:'habitat',def:'the natural place where an animal or plant lives',ex:'Deforestation destroys animal habitats.',e:'🌳'},
+    {w:'endangered species',def:'animals that may completely disappear',ex:'The Arabian leopard is an endangered species.',e:'🐆'},
+    {w:'conservation',def:'the protection of nature and wildlife',ex:'Many organizations work on conservation.',e:'🌍'},
+    {w:'atmosphere',def:'the layer of air around the Earth',ex:'Carbon dioxide pollutes the atmosphere.',e:'🌫️'},
+    {w:'ecosystem',def:'all living things in an area and how they depend on each other',ex:'Coral reefs are important ecosystems.',e:'🪸'},
+  ],fill:[
+    {sent:'A _____ is when an area gets no rain for a long time.',ans:0,opts:['drought','wildfire','flooding','storm']},
+    {sent:'The Arabian leopard is an endangered _____.',ans:2,opts:['habitat','ecosystem','species','atmosphere']},
+    {sent:'The _____ destroyed many homes near the forest.',ans:1,opts:['drought','wildfire','flooding','storm']},
+    {sent:'We must protect the _____ of rare animals.',ans:3,opts:['ecosystem','atmosphere','species','habitat']},
+    {sent:'_____ organizations protect animals and nature.',ans:0,opts:['Conservation','Pollution','Flooding','Drought']},
+  ]}
+};
+
+let curU=null;
+function initChips(){
+  const c=document.getElementById('vocab-chips');
+  Object.entries(UNITS).forEach(([u,d])=>{
+    const b=document.createElement('button');b.className='chip';b.innerHTML=d.emoji+' '+d.name;
+    b.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');curU=u;document.getElementById('vocab-main').style.display='block';renderBanner();showVW();};
+    c.appendChild(b);
+  });
+}
+function renderBanner(){const d=UNITS[curU];const el=document.getElementById('unit-banner');el.style.background=d.bg;el.innerHTML=`<span style="font-size:26px;">${d.emoji}</span><div><div style="font-weight:600;font-size:14px;color:${d.color};">${d.name}</div><div style="font-size:12px;color:#888;">${d.vocab.length} words</div></div>`;}
+function showVW(){const d=UNITS[curU];document.getElementById('v-display').innerHTML=`<div class="v-grid">${d.vocab.map(v=>`<div class="v-card"><div class="v-img" style="background:${d.bg};">${v.e}</div><div class="v-body"><div class="v-word">${v.w}</div><div class="v-def">${v.def}</div><div class="v-ex">${v.ex}</div></div></div>`).join('')}</div>`;}
+function showVF(){const d=UNITS[curU];document.getElementById('v-display').innerHTML=d.fill.map((f,i)=>`<div class="mcq-card"><div class="mcq-q">${i+1}. Complete: <em>${f.sent}</em></div><div style="display:flex;gap:7px;margin-bottom:9px;"><input id="fi-${i}" placeholder="your answer" style="flex:1;" onkeydown="if(event.key==='Enter')chkF(${i})"><button class="btn2" onclick="chkF(${i})">✓ Check</button></div><div class="mcq-fb" id="ffb-${i}"></div></div>`).join('');}
+function chkF(i){const d=UNITS[curU].fill[i];const v=document.getElementById('fi-'+i).value.trim().toLowerCase();const c=d.opts[d.ans].toLowerCase();const fb=document.getElementById('ffb-'+i);fb.className='mcq-fb on '+(v===c?'ok':'no');fb.textContent=v===c?'✓ Correct! "'+d.opts[d.ans]+'" is right.':'✗ The correct answer is: "'+d.opts[d.ans]+'"';}
+function showVM(){const d=UNITS[curU];const L=['A','B','C','D'];document.getElementById('v-display').innerHTML=d.fill.map((f,i)=>`<div class="mcq-card"><div class="mcq-q">${i+1}. ${f.sent}</div><div class="mcq-opts">${f.opts.map((o,j)=>`<button class="mcq-tile" onclick="chkVM(this,${i},${j})"><span class="tl">${L[j]}</span>${o}</button>`).join('')}</div><div class="mcq-fb" id="vm-${i}"></div></div>`).join('');}
+function chkVM(btn,qi,ai){const d=UNITS[curU].fill[qi];btn.closest('.mcq-card').querySelectorAll('.mcq-tile').forEach((b,j)=>{b.disabled=true;if(j===d.ans)b.classList.add('ok');else if(j===ai)b.classList.add('no');});const fb=btn.closest('.mcq-card').querySelector('.mcq-fb');fb.className='mcq-fb on '+(ai===d.ans?'ok':'no');fb.textContent=ai===d.ans?'✓ Correct! "'+d.opts[d.ans]+'" is right.':'✗ The correct answer is "'+d.opts[d.ans]+'".';}
+
+const GRAM={
+  ps:{color:'#1D9E75',title:'Present simple + adverbs of frequency',rule:'Use for <strong>habits and routines</strong>. Add <strong>-s/-es</strong> after he/she/it.<br>Adverbs: always · usually · often · sometimes · rarely · never<br>Place adverb <strong>before main verb</strong>: <em>She always drinks coffee.</em><br>After be: <em>He is always late.</em>',qs:[{q:'Choose the correct sentence.',opts:['She drinks always tea.','She always drinks tea.','She always drink tea.','She is always drink tea.'],a:1,exp:'Adverb "always" goes BEFORE the main verb "drinks".'},{q:'He _____ (not/like) spicy food.',opts:["don't like","doesn't likes","doesn't like","isn't like"],a:2,exp:'"Doesn\'t like" — use doesn\'t + base verb for he/she/it.'},{q:'_____ your brother exercise every day?',opts:['Do','Does','Is','Has'],a:1,exp:'Use "Does" for he/she/it questions.'}]},
+  pc:{color:'#1D9E75',title:'Present simple vs present continuous',rule:'<strong>Present simple</strong> = habits: <em>I drink water every day.</em><br><strong>Present continuous</strong> = happening now: <em>I am drinking water right now.</em><br>Form: <strong>am/is/are + verb-ing</strong><br>State verbs do NOT use -ing: know · want · need · like',qs:[{q:'I usually _____ by car, but today I _____ the bus.',opts:['drive / am taking','am driving / take','drive / takes','drives / am taking'],a:0,exp:'"Drive" = present simple (habit). "Am taking" = present continuous (today).'},{q:'She _____ in Jeddah. This week she _____ Riyadh.',opts:['is living / visits','live / is visiting','lives / is visiting','lives / visit'],a:2,exp:'"Lives" = permanent fact. "Is visiting" = temporary this week.'},{q:'Which sentence is correct?',opts:['I am knowing the answer.','She is wanting coffee.','They are studying right now.','He is needing help.'],a:2,exp:'"Are studying" is correct. Know, want, need are state verbs.'}]},
+  comp:{color:'#185FA5',title:'Comparative and superlative adjectives',rule:'<strong>Comparative</strong>: short → <strong>-er</strong> | long → <strong>more</strong><br><em>fast → faster | expensive → more expensive</em><br><strong>Superlative</strong>: short → <strong>-est</strong> | long → <strong>most</strong><br><strong>Irregular:</strong> good → better → the best | bad → worse → the worst',qs:[{q:'The train is _____ than the bus, but the plane is the _____.',opts:['more fast / fastest','faster / fastest','faster / most fast','fast / most fast'],a:1,exp:'"Faster" = comparative. "The fastest" = superlative.'},{q:'This is the _____ road in the city.',opts:['dangerouser','more dangerous','dangerousest','most dangerous'],a:3,exp:'Long adjectives use "most" for superlative.'},{q:'My car is _____ than my sister\'s car.',opts:['gooder','more good','best','better'],a:3,exp:'"Better" is the irregular comparative of "good".'}]},
+  pst:{color:'#993C1D',title:'Past simple (regular + irregular)',rule:'Use for <strong>finished actions in the past</strong>.<br>Regular: add <strong>-ed</strong>: walk → walked<br>Irregular: go → <strong>went</strong> | have → <strong>had</strong> | see → <strong>saw</strong> | find → <strong>found</strong><br>Negative: <strong>didn\'t + base verb</strong>',qs:[{q:'The three boys _____ 50 days in the Pacific Ocean.',opts:['survive','was surviving','did survived','survived'],a:3,exp:'"Survived" = regular past simple. Add -ed to "survive".'},{q:'She _____ her phone, but she _____ it under the bed.',opts:['lose / find','was lost / finds','lost / found','lost / finded'],a:2,exp:'"Lost" and "found" are both irregular past simple.'},{q:'They _____ arrive home in the evening.',opts:["don't","wasn't","didn't","not"],a:2,exp:'Use "didn\'t + base verb" for past simple negative.'}]},
+  pco:{color:'#993C1D',title:'Past continuous + when / while',rule:'Form: <strong>was/were + verb-ing</strong><br><strong>When</strong>: short past simple interrupts longer past continuous.<br><em>I was walking when I saw my friend.</em><br><strong>While</strong>: two continuous actions at the same time.',qs:[{q:'I _____ when my phone _____.',opts:['studied / was ringing','was studying / rang','was studying / was ringing','studied / rang'],a:1,exp:'"Was studying" = longer action. "Rang" = short interrupting action.'},{q:'_____ the sun was shining, the boys _____ fishing.',opts:['When / was','While / were','While / was','When / were'],a:1,exp:'"While" + past continuous = two actions at the same time.'},{q:'Choose the correct sentence.',opts:['She was reading while her brother sleeping.','She reading while her brother was sleeping.','She was reading while her brother was sleeping.','She was read while her brother slept.'],a:2,exp:'Both actions in progress: "was reading" and "was sleeping".'}]},
+  quant:{color:'#3B6D11',title:'Quantifiers',rule:'<strong>Countable</strong> (bottles, trees): many · a few<br><strong>Uncountable</strong> (water, pollution): much · a little<br><strong>Both</strong>: a lot of · some · any · no<br>In negatives/questions: <strong>any</strong>',qs:[{q:'There is too _____ plastic waste in the ocean.',opts:['many','few','little','much'],a:3,exp:'"Much" = uncountable nouns (waste). "Many" = countable.'},{q:"We don't have _____ time to finish the project.",opts:['some','many','any','a few'],a:2,exp:'"Any" is used in negative sentences.'},{q:'She has _____ ideas about reducing pollution.',opts:['a little','much','any','a few'],a:3,exp:'"A few" = countable (ideas). "A little" = uncountable.'}]},
+  art:{color:'#3B6D11',title:'Articles: a, an, the, zero article',rule:'<strong>a/an</strong> = first mention: <em>I saw a bird.</em><br><strong>the</strong> = specific, both know which: <em>The bird flew away.</em><br><strong>Zero article</strong> = general: <em>I love nature.</em><br>Use <strong>an</strong> before vowel sounds: an apple · an hour',qs:[{q:'I saw _____ whale shark. _____ whale shark was enormous.',opts:['the / A','a / a','a / The','the / The'],a:2,exp:'First mention = "a whale shark". Second mention (specific) = "The whale shark".'},{q:'_____ pollution is one of _____ biggest problems.',opts:['The / the','A / the','— / a','— / the'],a:3,exp:'General concept = zero article. "The biggest" always uses "the".'},{q:'She is _____ environmental scientist. She works for _____ government.',opts:['a / a','an / a','a / the','an / the'],a:3,exp:'"An environmental" = vowel sound. "The government" = specific.'}]},
+  inf:{color:'#534AB7',title:'Infinitives (to + base verb)',rule:'Use after: <strong>want · hope · plan · decide · intend · aim · would like · need</strong><br><em>I plan to study medicine after I graduate.</em>',qs:[{q:'She _____ become a doctor after she finishes college.',opts:['hope to','is hoping','hoped','hopes to'],a:3,exp:'"Hopes to" — after "hope", use the infinitive (to + base verb).'},{q:'They _____ leave home early to avoid the traffic.',opts:['decide to','deciding','will decided','decided to'],a:3,exp:'"Decided to" = past simple + infinitive.'},{q:'My ambition is _____ a successful engineer.',opts:['becoming','become','became','to become'],a:3,exp:'After "is", use "to + verb" for future plans.'}]},
+  fut:{color:'#534AB7',title:'Future forms: will, going to, present continuous',rule:'<strong>will</strong> = prediction or decision at moment of speaking<br><strong>going to</strong> = plan made before OR prediction with evidence<br><strong>Present continuous</strong> = fixed arrangement',qs:[{q:"I haven't booked yet, but I _____ travel to Riyadh next week.",opts:['will','am travelling','go to','am going to'],a:3,exp:'"Going to" = plan already decided before now.'},{q:'Watch out! That car _____ crash!',opts:['will','is crashing','crashes','is going to'],a:3,exp:'"Is going to" = prediction based on evidence we can see.'},{q:"A: I'm tired. B: I _____ make some coffee for you.",opts:['am going to','am making','go to',"'ll"],a:3,exp:'"Will" = decision made at this exact moment.'}]},
+  pp:{color:'#854F0B',title:'Present perfect vs past simple',rule:'<strong>Present perfect</strong>: have/has + past participle = experience connected to now<br><em>I have worked in three companies.</em><br><strong>Past simple</strong>: specific time in the past<br>PP signals: ever · never · just · already · yet<br>PS signals: yesterday · last year · ago',qs:[{q:'She _____ three countries. Last year she _____ Japan.',opts:['visited / has visited','has visited / has visited','visited / visited','has visited / visited'],a:3,exp:'"Has visited" = life experience. "Visited" = specific time.'},{q:'_____ you ever _____ scuba diving?',opts:['Did / tried','Have / try','Did / try','Have / tried'],a:3,exp:'"Have you ever tried?" = present perfect for life experiences.'},{q:'I _____ already _____ my application.',opts:['did / submit','have / submit','had / submitted','have / submitted'],a:3,exp:'Present perfect + "already" = completed action with present relevance.'}]},
+  ppfs:{color:'#854F0B',title:'Present perfect with for and since',rule:'<strong>for</strong> = a period of time: <em>I have lived here for five years.</em><br><strong>since</strong> = a point in time: <em>I have lived here since 2019.</em>',qs:[{q:'She has been a teacher _____ ten years.',opts:['since','ago','in','for'],a:3,exp:'"For" = period of time (ten years = duration).'},{q:'I have studied English _____ I was twelve.',opts:['for','ago','from','since'],a:3,exp:'"Since" = point in time. Starting point.'},{q:'He has worked at this company _____ 2020.',opts:['for','in','from','since'],a:3,exp:'"Since 2020" = started in 2020 and still working there.'}]},
+  zf:{color:'#0F6E56',title:'Zero and first conditional',rule:'<strong>Zero conditional</strong> = general truths<br>If + present simple, present simple<br><em>If you heat water to 100°C, it boils.</em><br><strong>First conditional</strong> = real future<br>If + present simple, will + base verb',qs:[{q:'If you _____ ice, it _____ into water.',opts:['heat / will turn','heated / turns','will heat / turns','heat / turns'],a:3,exp:'Zero conditional = general truth.'},{q:'If she _____ hard, she _____ the scholarship.',opts:['will study / will get','studies / gets','studied / will get','studies / will get'],a:3,exp:'First conditional = possible future.'},{q:'_____ you call me if you _____ any problems?',opts:['Do / will have','Are / have','Would / have','Will / have'],a:3,exp:'"Will you call" + "if you have" = first conditional question.'}]},
+  rel:{color:'#0F6E56',title:'Defining relative clauses',rule:'<strong>who</strong> = people | <strong>which/that</strong> = things | <strong>where</strong> = places<br><em>The person who invented this is a genius.</em><br><em>The app which I use is free.</em>',qs:[{q:'AI is a technology _____ is changing every industry.',opts:['who','what','where','that'],a:3,exp:'"That" or "which" for things.'},{q:'She is the engineer _____ designed this robot.',opts:['which','that','where','who'],a:3,exp:'"Who" for people.'},{q:'This is the hospital _____ my mother works.',opts:['which','who','that','where'],a:3,exp:'"Where" for places.'}]},
+  pass:{color:'#D4537E',title:'Passive voice (present + past)',rule:'<strong>Present passive</strong>: am/is/are + past participle<br><em>This product is made in China.</em><br><strong>Past passive</strong>: was/were + past participle<br><em>The car was invented in 1885.</em>',qs:[{q:'This smartphone _____ in South Korea.',opts:['manufactures','is manufacturing','manufacture','is manufactured'],a:3,exp:'"Is manufactured" = present passive.'},{q:'The first iPhone _____ in 2007.',opts:['is launched','launched','were launched','was launched'],a:3,exp:'"Was launched" = past passive. Singular → was.'},{q:'Many products _____ on social media every day.',opts:['is advertised','advertise','were advertised','are advertised'],a:3,exp:'"Are advertised" = present passive. Plural → are.'}]},
+  ut:{color:'#D4537E',title:'Used to (past habits)',rule:'Use for habits true in the past but <strong>NOT now</strong>.<br>Affirmative: <strong>used to + base verb</strong><br>Negative: <strong>didn\'t use to</strong><br>Question: <strong>Did + subject + use to?</strong>',qs:[{q:'People _____ buy music on CDs. Now they stream it.',opts:['use to','were used to','are used to','used to'],a:3,exp:'"Used to" = past habit that no longer exists.'},{q:"She _____ like school, but now she loves learning.",opts:["wasn't used to","isn't used to","didn't used to","didn't use to"],a:3,exp:'"Didn\'t use to" = past negative.'},{q:'_____ you _____ play outside as a child?',opts:['Did / used to','Do / used to','Were / use to','Did / use to'],a:3,exp:'"Did you use to...?" is the question form.'}]},
+  rep:{color:'#5F5E5A',title:'Reported speech (say and tell)',rule:'<strong>say</strong>: no object: <em>She said she was tired.</em><br><strong>tell</strong>: needs object: <em>She told me she was tired.</em><br>Tense changes: am/is → was | will → would | can → could',qs:[{q:'He said he _____ very tired after the trip.',opts:['is','were','am','was'],a:3,exp:'In reported speech, "am/is" → "was".'},{q:'"I will call you." She _____ she _____ call me.',opts:['told / will','said / will','told / would','said / would'],a:3,exp:'"Said" (no object). "Will" → "would".'},{q:'The teacher _____ us that the test _____ on Friday.',opts:['said / was','told / is','said / is','told / was'],a:3,exp:'"Told us" = tell + object. "Was" = tense change from "is".'}]},
+  sc:{color:'#378ADD',title:'Second conditional',rule:'Use for <strong>imaginary situations</strong>.<br>If + past simple, would + base verb<br><em>If I had more time, I would travel the world.</em>',qs:[{q:'If there _____ no wildfires, the forest _____ much safer.',opts:['was / will be','are / would be','were / will be','were / would be'],a:3,exp:'Second conditional = imaginary. If + past simple, would + base verb.'},{q:'What _____ you do if you _____ an endangered animal?',opts:['will / see','would / see','could / saw','would / saw'],a:3,exp:'"Would you do" + "if you saw" = second conditional.'},{q:'If I _____ more money, I _____ start an environmental charity.',opts:['have / will','would have / would','had / will','had / would'],a:3,exp:'"Had" (if-clause) + "would start" (result clause).'}]},
+  cpd:{color:'#378ADD',title:'Compound pronouns',rule:'<table style="width:100%;font-size:12px;border-collapse:collapse;"><tr style="background:#f8f8f8;"><td style="padding:4px 7px;"></td><td style="padding:4px 7px;font-weight:600;">-one/-body</td><td style="padding:4px 7px;font-weight:600;">-thing</td><td style="padding:4px 7px;font-weight:600;">-where</td></tr><tr><td style="padding:4px 7px;color:#1D9E75;font-weight:600;">some-</td><td style="padding:4px 7px;">someone</td><td style="padding:4px 7px;">something</td><td style="padding:4px 7px;">somewhere</td></tr><tr style="background:#f8f8f8;"><td style="padding:4px 7px;color:#185FA5;font-weight:600;">any-</td><td style="padding:4px 7px;">anyone</td><td style="padding:4px 7px;">anything</td><td style="padding:4px 7px;">anywhere</td></tr><tr><td style="padding:4px 7px;color:#A32D2D;font-weight:600;">no-</td><td style="padding:4px 7px;">no one</td><td style="padding:4px 7px;">nothing</td><td style="padding:4px 7px;">nowhere</td></tr><tr style="background:#f8f8f8;"><td style="padding:4px 7px;color:#854F0B;font-weight:600;">every-</td><td style="padding:4px 7px;">everyone</td><td style="padding:4px 7px;">everything</td><td style="padding:4px 7px;">everywhere</td></tr></table>',qs:[{q:'There is _____ in the forest. No animals live there.',opts:['anything','something','everything','nothing'],a:3,exp:'"Nothing" = no thing exists.'},{q:'Did _____ call while I was out?',opts:['someone','everyone','no one','anyone'],a:3,exp:'"Anyone" is used in questions.'},{q:'_____ knows that climate change is serious.',opts:['Anyone','No one','Someone','Everyone'],a:3,exp:'"Everyone" = all people, without exception.'}]}
+};
+
+function loadGram(){
+  const val=document.getElementById('gram-sel').value;if(!val)return;
+  const g=GRAM[val];document.getElementById('gram-content').style.display='block';
+  document.getElementById('gram-rule-box').innerHTML=`<div class="gram-rule"><div style="font-size:11px;font-weight:600;color:${g.color};text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">${g.title}</div>${g.rule}</div>`;
+  const L=['A','B','C','D'];
+  document.getElementById('gram-qs').innerHTML=g.qs.map((q,i)=>`<div class="mcq-card"><div class="mcq-q">${q.q}</div><div class="mcq-opts">${q.opts.map((o,j)=>`<button class="mcq-tile" onclick="chkG(this,${i},${j},'${val}')"><span class="tl">${L[j]}</span>${o}</button>`).join('')}</div><div class="mcq-fb" id="gq-${i}"></div></div>`).join('');
+}
+function chkG(btn,qi,ai,val){const q=GRAM[val].qs[qi];btn.closest('.mcq-card').querySelectorAll('.mcq-tile').forEach((b,j)=>{b.disabled=true;if(j===q.a)b.classList.add('ok');else if(j===ai)b.classList.add('no');});const fb=btn.closest('.mcq-card').querySelector('.mcq-fb');fb.className='mcq-fb on '+(ai===q.a?'ok':'no');fb.textContent=(ai===q.a?'✓ Correct! ':'✗ The correct answer is: "'+q.opts[q.a]+'". ')+q.exp;}
+
+const WTYPES={
+  daily:{title:'Daily routine description',fields:[{id:'ts',label:'Topic sentence',ph:'I have a busy daily routine every day.'},
+    {id:'i1',label:'Idea 1 + detail (morning)',ph:'I wake up early in the morning. For example, I get up at six and have breakfast before college.'},
+    {id:'i2',label:'Idea 2 + detail (afternoon)',ph:'I spend the afternoon at college. After my classes, I usually study in the library for two hours.'},
+    {id:'i3',label:'Idea 3 + detail (evening)',ph:'In the evening, I relax with my family. We usually have dinner together and watch TV.'},
+    {id:'cs',label:'Concluding sentence',ph:'I think my routine keeps me healthy and organized.'}]},
+  comp:{title:'Comparative paragraph',fields:[{id:'ts',label:'Topic sentence',ph:'There are important differences between traveling by car and traveling by bus in Jeddah.'},
+    {id:'i1',label:'Point 1 + detail',ph:'Cars are faster than buses. For example, I get to college in 15 minutes by car but 40 minutes by bus.'},
+    {id:'i2',label:'Point 2 + detail',ph:'However, buses are cheaper than cars. A bus ticket costs only 2 riyals, but fuel costs much more.'},
+    {id:'i3',label:'Point 3 + detail',ph:'Cars are also more comfortable than buses. You can listen to music and control the temperature.'},
+    {id:'cs',label:'Concluding sentence',ph:'In conclusion, cars are better for comfort and speed, but buses are better for saving money.'}]},
+  narr:{title:'Narrative paragraph (survival story)',fields:[{id:'ts',label:'Headline + topic sentence',ph:'Three Students Survive Two Days Lost in the Saudi Desert. Last summer, three college students had a dangerous experience near Riyadh.'},
+    {id:'i1',label:'Event 1 + detail',ph:'One day, they went camping in the desert. The weather was hot and sunny, so they decided to explore the area.'},
+    {id:'i2',label:'Event 2 + detail (the problem)',ph:'Suddenly, a strong sandstorm started while they were walking. They could not see anything, and they got lost.'},
+    {id:'i3',label:'Event 3 + detail (the solution)',ph:'Two days later, a rescue team found them near a small hill. Luckily, the students were tired but safe.'},
+    {id:'cs',label:'Concluding sentence',ph:'In the end, they happily returned to their families and learned an important lesson about safety.'}]},
+  opin:{title:'Opinion paragraph',fields:[{id:'ts',label:'Topic sentence (your opinion)',ph:'In my opinion, students should not use mobile phones in class.'},
+    {id:'i1',label:'Reason 1 + detail',ph:'Firstly, phones distract students from learning. For example, students often play games instead of listening to the teacher.'},
+    {id:'i2',label:'Reason 2 + detail',ph:'In addition, phones can make students lazy. Students use the phone to find answers instead of thinking for themselves.'},
+    {id:'i3',label:'Reason 3 + detail',ph:'Finally, using phones is not respectful to the teacher. For instance, it shows students are not interested in the lesson.'},
+    {id:'cs',label:'Concluding sentence',ph:"To conclude, I strongly believe that phones should stay in students' bags during class time."}]},
+  fut:{title:'Future plans paragraph',fields:[{id:'ts',label:'Topic sentence',ph:'After graduation, I have many exciting plans for my future.'},
+    {id:'i1',label:'Plan 1 + detail',ph:'Firstly, I am going to get a job in a big hospital. I hope to work as a nurse and help many patients every day.'},
+    {id:'i2',label:'Plan 2 + detail',ph:"In addition, I plan to continue my education. I intend to get a Master's degree after I have some work experience."},
+    {id:'i3',label:'Plan 3 + detail',ph:'Finally, I would like to start my own business one day. I aim to open a small clinic in my city.'},
+    {id:'cs',label:'Concluding sentence',ph:'In conclusion, I am excited about my future and I will work hard to achieve all my goals.'}]},
+  rev:{title:'Write a review',fields:[{id:'ts',label:'Title + overall opinion',ph:'The Green Garden Restaurant ⭐⭐⭐⭐ — I really enjoyed my visit to this restaurant last Friday.'},
+    {id:'i1',label:'Positive 1 + detail',ph:'The food was delicious and fresh. For example, the grilled chicken was perfectly cooked and the salad was very tasty.'},
+    {id:'i2',label:'Positive 2 + detail',ph:'The service was also excellent. The waiters were friendly and brought our food quickly.'},
+    {id:'i3',label:'One negative + detail',ph:'However, the restaurant was a little noisy. There were many families, so it was difficult to have a quiet conversation.'},
+    {id:'cs',label:'Recommendation',ph:'I would highly recommend this restaurant for families who enjoy good food. The experience was worth every riyal.'}]},
+  bio:{title:'Biography paragraph',fields:[{id:'ts',label:'Topic sentence (who + why important)',ph:'Ibn Battuta was one of the greatest explorers in history, famous for travelling more than any other person of his time.'},
+    {id:'i1',label:'Early life + detail',ph:'He was born in Morocco in 1304. He grew up in a religious family and learned Islamic law when he was young.'},
+    {id:'i2',label:'Main achievement + detail',ph:'His most famous achievement was his 29-year journey around the world. He visited more than 44 countries.'},
+    {id:'i3',label:'Legacy + detail',ph:'He wrote a famous book called the Rihla, which means "The Journey". It tells the story of everything he experienced.'},
+    {id:'cs',label:'Concluding sentence',ph:'Today, Ibn Battuta is remembered as a great hero of exploration and his story continues to inspire millions.'}]}
+};
+
+function loadWrite(){
+  const val=document.getElementById('write-sel').value;if(!val)return;
+  const w=WTYPES[val];
+  document.getElementById('write-guide').style.display='block';
+  document.getElementById('write-guide').innerHTML=`<div class="lbl">${w.title}</div><div style="font-size:13px;color:#555;line-height:1.6;">Write <strong>7 sentences total</strong>: topic sentence · idea 1 + detail · idea 2 + detail · idea 3 + detail · concluding sentence.</div>`;
+  document.getElementById('write-sym').style.display='block';
+  document.getElementById('write-form').style.display='block';
+  document.getElementById('write-title').textContent=w.title;
+  document.getElementById('write-fields').innerHTML=w.fields.map(f=>`<div style="margin-bottom:11px;"><div style="font-size:11px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">${f.label}</div><textarea id="wf-${f.id}" placeholder="${f.ph}" style="min-height:65px;font-size:13px;"></textarea></div>`).join('');
+  document.getElementById('w-result').style.display='none';
+}
+function clearWriteForm(){const sel=document.getElementById('write-sel').value;if(!sel)return;WTYPES[sel].fields.forEach(f=>{const el=document.getElementById('wf-'+f.id);if(el)el.value='';});document.getElementById('w-result').style.display='none';}
+
+async function getWriteCorrection(){
+  const sel=document.getElementById('write-sel').value;if(!sel)return;
+  const w=WTYPES[sel];
+  const parts=w.fields.map(f=>{const el=document.getElementById('wf-'+f.id);return el&&el.value.trim()?f.label+': '+el.value.trim():null;}).filter(Boolean);
+  if(parts.length<2){alert('Please write at least 2 sentences before getting correction.');return;}
+  const fullText=parts.join('\n');
+  document.getElementById('w-btn').disabled=true;document.getElementById('w-load').style.display='flex';document.getElementById('w-result').style.display='none';
+  try{
+    const reply=await callAI(`You are an EFL writing corrector for B1 level students. Writing type: "${w.title}"\n\nStudent text:\n${fullText}\n\nReply in this EXACT format with no extra text:\n\nCORRECTED:\n[Rewrite the student text. For each error show: ~~wrong~~ [correct](CODE) where CODE is SP for spelling, GR for grammar, WW for wrong word, P for punctuation, CAP for capital letter, WF for wrong word form. If no errors, write the text as is.]\n\nGOOD:\n[1-2 specific strengths. Simple English. Max 2 sentences.]\n\nENCOURAGEMENT:\n[One warm short sentence. Max 15 words.]`);
+    renderCorrection(reply);
+  }catch(e){
+    document.getElementById('w-result').style.display='block';
+    document.getElementById('corr-box').innerHTML='<span style="color:#A32D2D;">Sorry, there was a problem. Please try again.</span>';
+    document.getElementById('w-good').innerHTML='';document.getElementById('w-enc').innerHTML='';
+  }finally{document.getElementById('w-btn').disabled=false;document.getElementById('w-load').style.display='none';}
+}
+
+function renderCorrection(reply){
+  const cM=reply.match(/CORRECTED:\n?([\s\S]*?)(?=\nGOOD:|$)/i);
+  const gM=reply.match(/GOOD:\n?([\s\S]*?)(?=\nENCOURAGEMENT:|$)/i);
+  const eM=reply.match(/ENCOURAGEMENT:\n?([\s\S]*?)$/i);
+  let ct=cM?cM[1].trim():'';
+  const codeMap={'SP':'sp','GR':'gr','WW':'ww','P':'p','CAP':'cap','WF':'wf'};
+  ct=ct.replace(/~~([^~]+)~~\s*\[([^\]]+)\]\(([A-Z^]+)\)/g,(m,wrong,fix,code)=>{
+    const cl=codeMap[code]||'sp';
+    return`<span class="e-${cl}">${wrong}</span> <span class="e-fix">${fix}</span><sup class="sup s-${cl}">${code}</sup>`;
+  }).replace(/~~([^~]+)~~\s*\[([^\]]+)\]/g,'<span class="e-sp">$1</span> <span class="e-fix">$2</span>').replace(/\n/g,'<br>');
+  document.getElementById('corr-box').innerHTML=ct||'<em style="color:#888;">No errors found. Great writing!</em>';
+  document.getElementById('w-good').innerHTML=gM&&gM[1].trim()?`<div class="fb-good"><strong>✓ What is good:</strong> ${gM[1].trim()}</div>`:'';
+  document.getElementById('w-enc').innerHTML=eM&&eM[1].trim()?`<div class="fb-enc">${eM[1].trim()}</div>`:'';
+  document.getElementById('w-result').style.display='block';
+}
+
+const SPEAK_DATA={
+  u1:{topic:'Lifestyle and habits',qs:[{q:'Do you sleep well at night?',hint:'Say yes or no, and why. Use: I usually / I always / because'},{q:'What do you do in the morning?',hint:'Say 2 things. Use: First I... Then I...'},{q:'Do you do exercise? What do you do?',hint:'Say yes or no. If yes, say what and when.'},{q:'What do you eat for breakfast?',hint:'Use: I usually eat... / I like to eat...'},{q:'Is your lifestyle healthy? Why?',hint:'Give one reason. Use: I think... because...'}]},
+  u3:{topic:'Transportation',qs:[{q:'How do you go to college?',hint:'Say: by car / by bus / on foot. Say how long it takes.'},{q:'Is traffic bad in your city?',hint:'Say yes or no. Give one example.'},{q:'Do you prefer a car or the bus? Why?',hint:'Choose one. Give one reason.'},{q:'How long does it take to get to college?',hint:'Use: It takes about... minutes.'},{q:'Is public transportation good in Jeddah?',hint:'Say yes or no. Give one reason.'}]},
+  u4:{topic:'Challenges',qs:[{q:'What is something difficult you did at college?',hint:'Say what it was. Use: I had to... / It was difficult because...'},{q:'Are you scared of anything? What?',hint:'Say yes and what. Use: I am scared of...'},{q:'What do you do when something is very difficult?',hint:'Say one thing. Use: When something is hard, I...'},{q:'Did you ever help someone in a difficult situation?',hint:'Say yes or no. If yes, say what happened.'},{q:'What is your biggest achievement so far?',hint:'Use: I am proud of... / My biggest achievement is...'}]},
+  u5:{topic:'The environment',qs:[{q:'Do you recycle at home?',hint:'Say yes or no. Say what you recycle.'},{q:'Is pollution a problem in your city?',hint:'Say yes or no. Give one example.'},{q:'What can you do to help the environment?',hint:'Give one idea. Use: I can... / People should...'},{q:'Do you use a lot of plastic?',hint:'Say yes or no. Give one example.'},{q:'What is the weather like in Jeddah? Is it changing?',hint:'Describe the weather. Say if you think it is changing.'}]},
+  u6:{topic:'Stages of life',qs:[{q:'What is your plan after you finish the prep year?',hint:'Say one plan. Use: I am going to... / I plan to...'},{q:'What is the most important thing in life for you?',hint:'Use: The most important thing for me is...'},{q:'Do you want to get married? When?',hint:'Say yes or no. Give a reason.'},{q:'What do you want to do before you are 30?',hint:'Use: Before I am 30, I want to...'},{q:'Is life easier for young people today than before?',hint:'Say yes or no. Give one reason.'}]},
+  u7:{topic:'Work and jobs',qs:[{q:'What is your dream job? Why?',hint:'Say the job. Give one reason. Use: I want to be a... because...'},{q:'Does your mother or father work? What do they do?',hint:'Say yes or no. Say the job.'},{q:'Do you want to work in Saudi Arabia or abroad?',hint:'Choose one. Give one reason.'},{q:'What is an important skill for a good job?',hint:'Use: I think... is important because...'},{q:'Is it better to have one job or your own business?',hint:'Choose one. Give one reason.'}]},
+  u8:{topic:'Technology',qs:[{q:'How many hours do you use your phone every day?',hint:'Use: I use my phone for about... hours.'},{q:'What app do you use the most? Why?',hint:'Say the app name. Give one reason.'},{q:'Is technology good for students? Why?',hint:'Say yes or no. Give one reason.'},{q:'Do you think AI can help you study? How?',hint:'Say yes or no. Give one example.'},{q:'What technology can you not live without?',hint:'Use: I cannot live without... because...'}]},
+  u9:{topic:'Products and shopping',qs:[{q:'Do you prefer to shop online or in a store?',hint:'Choose one. Give one reason.'},{q:'What is your favourite brand? Why?',hint:'Say the brand. Give one reason.'},{q:'What was the last thing you bought?',hint:'Use: The last thing I bought was...'},{q:'Do you think ads on social media are useful?',hint:'Say yes or no. Give one reason.'},{q:'Do you check reviews before you buy something?',hint:'Say yes or no. Give a reason.'}]},
+  u11:{topic:'History',qs:[{q:'What historical place in Saudi Arabia do you know?',hint:'Say the name. Say one fact about it.'},{q:'Do you like learning about history? Why?',hint:'Say yes or no. Give one reason.'},{q:'Who is a famous person from Saudi history?',hint:'Say the name. Say one thing they did.'},{q:'Is it important to know the history of your country?',hint:'Say yes or no. Give one reason.'},{q:'What was life like in Saudi Arabia 100 years ago?',hint:'Say one or two things you think were different.'}]},
+  u12:{topic:'Nature and weather',qs:[{q:'What is the weather like in Jeddah in summer?',hint:'Use: It is very... / The temperature is...'},{q:'Do you like spending time outside in nature?',hint:'Say yes or no. Give a reason.'},{q:'Have you ever seen a sandstorm?',hint:'Say yes or no. If yes, describe what it was like.'},{q:'What is your favourite natural place in Saudi Arabia?',hint:'Say the place. Say why you like it.'},{q:'What can people do to protect nature?',hint:'Use: I think people should... / We can...'}]}
+};
+
+let mediaRecorder=null,audioChunks=[],activeQIdx=null,recTimers={},currentUnit='';
+
+function loadSpeak(){
+  const val=document.getElementById('speak-sel').value;if(!val)return;
+  currentUnit=val;
+  const d=SPEAK_DATA[val];
+  const wrap=document.getElementById('speak-qs-wrap');
+  wrap.innerHTML=d.qs.map((q,i)=>`
+    <div class="card" style="margin-bottom:9px;">
+      <div style="display:flex;align-items:flex-start;gap:9px;margin-bottom:7px;">
+        <span style="width:24px;height:24px;border-radius:50%;background:#1D9E75;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span>
+        <div style="font-size:14px;font-weight:500;color:#1a1a1a;line-height:1.5;">${q.q}</div>
+      </div>
+      <div style="font-size:12px;color:#555;margin-bottom:11px;padding:6px 9px;background:#f0faf5;border-radius:6px;">💡 ${q.hint}</div>
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+        <button class="btn-rec" id="rec-btn-${i}" onclick="toggleRec(${i})">🎙️ Record</button>
+        <span style="font-size:13px;color:#A32D2D;font-weight:600;min-width:38px;" id="rec-timer-${i}"></span>
+        <span style="font-size:12px;color:#888;" id="rec-status-${i}"></span>
+      </div>
+      <audio id="audio-${i}" style="display:none;margin-top:9px;width:100%;" controls></audio>
+      <div style="margin-top:9px;display:none;" id="fb-btn-${i}">
+        <button class="btn" onclick="getSpeakFb(${i})">✨ Get feedback</button>
+      </div>
+      <div class="dots" id="speak-load-${i}" style="margin-top:7px;"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:12px;">Listening to your answer...</span></div>
+      <div id="speak-fb-${i}" style="display:none;background:#f8f8f8;border-radius:8px;padding:11px 13px;margin-top:9px;font-size:13px;line-height:1.8;"></div>
+    </div>`).join('');
+}
+
+async function toggleRec(idx){
+  if(mediaRecorder&&mediaRecorder.state==='recording'&&activeQIdx===idx){mediaRecorder.stop();return;}
+  if(mediaRecorder&&mediaRecorder.state==='recording'){
+    mediaRecorder.stop();clearInterval(recTimers[activeQIdx]);
+    document.getElementById('rec-btn-'+activeQIdx).innerHTML='🎙️ Record';
+    document.getElementById('rec-btn-'+activeQIdx).classList.remove('recording');
+    document.getElementById('rec-timer-'+activeQIdx).textContent='';
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks=[];activeQIdx=idx;
+    mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+    mediaRecorder.onstop=()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      clearInterval(recTimers[idx]);
+      document.getElementById('rec-btn-'+idx).innerHTML='🎙️ Record again';
+      document.getElementById('rec-btn-'+idx).classList.remove('recording');
+      document.getElementById('rec-timer-'+idx).textContent='';
+      document.getElementById('rec-status-'+idx).textContent='✓ Saved';
+      const blob=new Blob(audioChunks,{type:'audio/webm'});
+      document.getElementById('audio-'+idx).src=URL.createObjectURL(blob);
+      document.getElementById('audio-'+idx).style.display='block';
+      document.getElementById('fb-btn-'+idx).style.display='block';
+    };
+    mediaRecorder.start();
+    document.getElementById('rec-btn-'+idx).innerHTML='⏹️ Stop';
+    document.getElementById('rec-btn-'+idx).classList.add('recording');
+    document.getElementById('rec-status-'+idx).textContent='';
+    let s=0;recTimers[idx]=setInterval(()=>{s++;const m=Math.floor(s/60);const sc=s%60;document.getElementById('rec-timer-'+idx).textContent=m+':'+(sc<10?'0':'')+sc;},1000);
+  }catch(e){alert('Please allow microphone access in your browser settings and try again.');}
+}
+
+async function getSpeakFb(idx){
+  const d=SPEAK_DATA[currentUnit];const q=d.qs[idx];
+  document.getElementById('speak-load-'+idx).style.display='flex';
+  document.getElementById('speak-fb-'+idx).style.display='none';
+  try{
+    const blob=new Blob(audioChunks,{type:'audio/webm'});
+    const reader=new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onload=async()=>{
+      const base64=reader.result.split(',')[1];
+      let reply='';
+      try{
+        reply=await callAIWithAudio(`You are a warm encouraging English teacher for A2-B1 students. The student answered: "${q.q}". Hint they had: "${q.hint}". Listen to their audio and give very simple feedback. Use very simple English words. Format:\nGOOD: [one short sentence - what they did well]\nFIX: [one short sentence - one thing to improve, with correct example]\nMODEL: [one perfect model answer in simple A2-B1 English]`,base64,'audio/webm');
+      }catch(e){
+        reply=await callAI(`Give simple speaking feedback for this question: "${q.q}". Student is A2-B1 level.\nFormat:\nGOOD: You practised speaking — well done!\nFIX: Try to give more details in your answer. For example: "${q.hint}"\nMODEL: [one model answer in simple A2 English for this question]`);
+      }
+      const gM=reply.match(/GOOD:\s*([^\n]+)/i);
+      const fM=reply.match(/FIX:\s*([^\n]+)/i);
+      const mM=reply.match(/MODEL:\s*([^\n]+)/i);
+      const fb=document.getElementById('speak-fb-'+idx);
+      fb.innerHTML=(gM?`<div style="color:#085041;margin-bottom:6px;">✓ <strong>Good:</strong> ${gM[1]}</div>`:'')+
+        (fM?`<div style="color:#854F0B;margin-bottom:6px;">💡 <strong>Try this:</strong> ${fM[1]}</div>`:'')+
+        (mM?`<div style="color:#185FA5;font-style:italic;">🔊 <strong>Model answer:</strong> "${mM[1]}"</div>`:'');
+      fb.style.display='block';
+      document.getElementById('speak-load-'+idx).style.display='none';
+    };
+  }catch(e){
+    document.getElementById('speak-load-'+idx).style.display='none';
+    document.getElementById('speak-fb-'+idx).innerHTML='<span style="color:#A32D2D;">Sorry, there was a problem. Please try again.</span>';
+    document.getElementById('speak-fb-'+idx).style.display='block';
+  }
+}
+
+async function loadRead(){
+  const sel=document.getElementById('read-sel');const topic=sel.options[sel.selectedIndex].text;
+  document.getElementById('read-load').style.display='flex';document.getElementById('read-out').style.display='none';
+  try{
+    const reply=await callAI(`Write a B1 reading exercise about the theme: "${topic}".\n\nFormat EXACTLY like this:\n\nPASSAGE:\n[Original 200-word B1 passage. New content only - do NOT copy any textbook.]\n\nQUESTIONS:\n1. [question] A) ... B) ... C) ... D) ... ANSWER: [letter]\n2. [question] A) ... B) ... C) ... D) ... ANSWER: [letter]\n3. [question] A) ... B) ... C) ... D) ... ANSWER: [letter]\n4. [question] A) ... B) ... C) ... D) ... ANSWER: [letter]\n5. [question] A) ... B) ... C) ... D) ... ANSWER: [letter]`);
+    renderReading(reply,topic);
+  }catch(e){document.getElementById('read-load').style.display='none';alert('Could not generate reading passage. Please try again.');}
+}
+
+function renderReading(reply,topic){
+  const pM=reply.match(/PASSAGE:\n?([\s\S]*?)(?=\nQUESTIONS:|$)/i);
+  const qM=reply.match(/QUESTIONS:\n?([\s\S]*?)$/i);
+  document.getElementById('read-theme').textContent=topic;
+  document.getElementById('read-pass').textContent=pM?pM[1].trim():'';
+  const qText=qM?qM[1].trim():'';
+  const qLines=qText.split(/\n(?=\d+\.)/).filter(Boolean);
+  const L=['A','B','C','D'];
+  document.getElementById('read-qs').innerHTML=qLines.map((ql,i)=>{
+    const ansM=ql.match(/ANSWER:\s*([A-D])/i);const ans=ansM?ansM[1].toUpperCase():'A';
+    const qOnly=ql.replace(/ANSWER:.*$/i,'').replace(/^\d+\.\s*/,'').trim();
+    const opts=[];
+    ['A)','B)','C)','D)'].forEach((lt)=>{const m=ql.match(new RegExp(lt.replace(')','\\)')+'\\s*([^A-D\\)\\n]+)'));if(m)opts.push(m[1].trim());});
+    if(opts.length<4)return'';
+    const ai=L.indexOf(ans);
+    return`<div class="mcq-card"><div class="mcq-q">${i+1}. ${qOnly}</div><div class="mcq-opts">${opts.map((o,j)=>`<button class="mcq-tile" onclick="chkRead(this,${j},${ai})"><span class="tl">${L[j]}</span>${o}</button>`).join('')}</div><div class="mcq-fb" id="rq-${i}"></div></div>`;
+  }).join('');
+  document.getElementById('read-load').style.display='none';
+  document.getElementById('read-out').style.display='block';
+}
+function chkRead(btn,ai,correct){btn.closest('.mcq-card').querySelectorAll('.mcq-tile').forEach((b,j)=>{b.disabled=true;if(j===correct)b.classList.add('ok');else if(j===ai)b.classList.add('no');});const fb=btn.closest('.mcq-card').querySelector('.mcq-fb');fb.className='mcq-fb on '+(ai===correct?'ok':'no');fb.textContent=ai===correct?'✓ Correct!':'✗ Not quite. The correct answer is highlighted in green.';}
+
+const EXPO={
+  s1:{name:'Station 1 — AI Audio Studio',c:'#0F6E56',bg:'#E1F5EE',tools:['NotebookLM — notebooklm.google.com','Google AI Studio — aistudio.google.com','TTSMaker — ttsmaker.com'],vocab:['audio: sound you can hear','podcast: a recorded program you listen to','upload: to send a file from your device to the internet','generate: to create something automatically','voiceover: a voice that explains while you listen','QR code: a square code that opens a link when you scan it'],qs:['What does your station show visitors?','Can you explain NotebookLM in three simple sentences?','What is Dual Coding and why does it help you study?','What do you say if a visitor asks: Is this tool really free?'],tips:['Practise your hook sentence 10 times out loud.','Know your 3 agreed questions and answers by memory.','If the tool is slow, stay calm and explain what it is doing.']},
+  s2:{name:'Station 2 — AI Research & Source-Checker',c:'#185FA5',bg:'#E6F1FB',tools:['Consensus — consensus.app','Perplexity — perplexity.ai'],vocab:['academic source: a trusted research paper or journal','citation: a reference to a book or article','verify: to check that something is true','Consensus Meter: a visual tool showing how many studies agree','critical thinking: ability to analyze and check information','peer-reviewed: checked by experts before publishing'],qs:['What problem does your station solve for students?','What is the Consensus Meter and how do you read it?','Why is Perplexity better than Google for academic questions?','What should a student do after finding a source on Perplexity?'],tips:['Type your pre-scripted question slowly and clearly.','Point to the Consensus Meter bars and explain what they mean.','Ask the audience to click a citation number themselves.','Say: always check the source — do not trust AI blindly.']},
+  s3:{name:'Station 3 — AI Visual Study Studio',c:'#3B6D11',bg:'#EAF3DE',tools:['MindMapAI — mindmapai.app','GitMind — gitmind.com','Fotor AI Infographic — fotor.com/ai-infographic-generator'],vocab:['mind map: a diagram showing how ideas connect','infographic: a visual image showing information clearly','branch: a line on a mind map that connects ideas','Picture Superiority Effect: people remember images better than words','generate: to create something automatically','template: a ready-made design you can change and use'],qs:['What is the difference between a mind map and an infographic?','Why is studying with visuals better than re-reading?','Can you show how MindMapAI works in 30 seconds?','What is the Picture Superiority Effect?'],tips:['Type your topic clearly — be specific.','Show the audience the map generating live on the screen.','Have the printed mind map and infographic ready as your display.','Explain: two channels in your brain at once means you remember more.']},
+  s4:{name:'Station 4 — AI Speaking & Self-Quiz Studio',c:'#534AB7',bg:'#EEEDFE',tools:['TalkPal — talkpal.ai','PowerPoint Speaker Coach — powerpoint.office.com','ELSA Speak — elsaspeak.com'],vocab:['fluency: ability to speak smoothly and naturally','pronunciation: the way you say words correctly','filler words: um and uh — words we say when thinking','pacing: the speed at which you speak','phoneme: one individual sound in a word','feedback: information about how well you did something'],qs:['What is TalkPal and why is it useful for shy students?','What does Speaker Coach tell you after your speech?','How does ELSA Speak score your pronunciation?','Why is speaking practice important for college?'],tips:['Speak clearly and not too fast — show good pacing yourself.','Have your before and after audio ready to play immediately.','Let a volunteer try ELSA Speak on the station device.','Say: speaking is not a talent. It is a skill you build.']},
+  s5:{name:'Station 5 — AI Video Studio',c:'#D4537E',bg:'#FBEAF0',tools:['Google Vids — vids.google.com','Canva Video — canva.com/video'],vocab:['storyboard: a plan showing images and text for each part of a video','prompt: a description or instruction you give to an AI tool','caption: words shown at the bottom of a video','tutorial: a video or guide that teaches you how to do something','template: a ready-made design you can change and use','export: to save a file in a format you can share with others'],qs:['What is the difference between Google Vids and Canva Video?','What makes a strong prompt? Give an example.','Why is making a teaching video a good way to study?','What safety rule should students follow when making AI videos?'],tips:['Show a weak prompt then a strong prompt — the difference is powerful.','Have your finished video ready and working before the event.','Tell visitors: you can make this video tonight — it takes 10 minutes.']}
+};
+
+function loadExpo(){
+  const val=document.getElementById('expo-sel').value;if(!val){document.getElementById('expo-out').innerHTML='';return;}
+  const s=EXPO[val];
+  document.getElementById('expo-out').innerHTML=`<div class="card" style="margin-bottom:0;">
+    <div style="background:${s.bg};border-radius:8px;padding:10px 13px;margin-bottom:13px;display:flex;align-items:center;gap:10px;"><span style="font-size:20px;">🤖</span><div style="font-size:13px;font-weight:600;color:${s.c};">${s.name}</div></div>
+    <div class="lbl">Your tools</div>${s.tools.map(t=>`<div class="expo-tool">🔧 ${t}</div>`).join('')}
+    <div class="lbl" style="margin-top:13px;">Key vocabulary</div>${s.vocab.map(v=>`<div style="font-size:13px;padding:5px 0;border-bottom:1px solid #f0f0f0;color:#333;line-height:1.5;"><strong style="color:${s.c};">${v.split(':')[0]}</strong>:${v.split(':')[1]}</div>`).join('')}
+    <div class="lbl" style="margin-top:13px;">Practice questions</div>${s.qs.map((q,i)=>`<div style="display:flex;gap:9px;align-items:flex-start;padding:9px 11px;background:#f8f8f8;border-radius:8px;font-size:13px;color:#333;margin-bottom:7px;line-height:1.5;"><span style="width:22px;height:22px;border-radius:50%;background:${s.c};color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span>${q}</div>`).join('')}
+    <div class="lbl" style="margin-top:13px;">Event day tips</div>${s.tips.map(t=>`<div class="expo-tip"><span style="color:${s.c};font-weight:700;flex-shrink:0;margin-top:1px;">✓</span>${t}</div>`).join('')}
+  </div>`;
+}
+
+async function sendExpoAI(){
+  const text=document.getElementById('expo-inp').value.trim();if(!text)return;
+  const sel=document.getElementById('expo-sel');const station=sel.value?sel.options[sel.selectedIndex].text:'AI Expo';
+  document.getElementById('expo-load').style.display='flex';document.getElementById('expo-reply').style.display='none';
+  try{
+    const reply=await callAI(`You help B1 English students prepare for the AI Expo. Station: "${station}". Student question: "${text}". Use simple clear English. Be specific and encouraging. Max 5 sentences.`);
+    document.getElementById('expo-reply').textContent=reply;document.getElementById('expo-reply').style.display='block';
+  }catch(e){document.getElementById('expo-reply').textContent='Sorry, there was a problem. Please try again.';document.getElementById('expo-reply').style.display='block';}
+  document.getElementById('expo-load').style.display='none';document.getElementById('expo-inp').value='';
+}
+
+initChips();
+</script>
+</body>
+</html>
